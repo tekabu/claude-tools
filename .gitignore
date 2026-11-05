@@ -1,0 +1,3 @@
+# Runtime capture artifacts
+statusline/samples/stdin-*.json
+statusline/samples/.capture
