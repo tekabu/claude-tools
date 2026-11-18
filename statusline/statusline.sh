@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Code status line: model │ ctx % used/size │ 5h % ↻reset │ wk % ↻reset │ user
+# Claude Code status line: profile │ model │ ctx % used/size │ 5h % ↻reset │ wk % ↻reset │ user
 # Data: status line stdin JSON only (no network, no MCP). Email from <config>/.claude.json.
 # One jq call parses stdin + account file and formats everything (dates, token counts).
 # Capture one stdin sample: touch "$(dirname "$0")/samples/.capture"
@@ -72,9 +72,18 @@ if [ -f "$CFG/.caveman-active" ]; then
   [ -n "$cave" ] && badge=$(bash "$cave" </dev/null 2>/dev/null)
 fi
 
+# Profile name from the config dir: ~/.claude → main, ~/.claude-rtk → rtk, other dirs → their basename
+prof=$(basename "${CFG%/}")
+case "$prof" in
+  .claude) prof=main ;;
+  .claude-*) prof=${prof#.claude-} ;;
+esac
+prof=$(printf '%s' "$prof" | tr -cd '[:alnum:]._-')
+
 sep=' \033[90m│\033[0m '
 out=""
 [ -n "$badge" ] && out+="$badge "
+[ -n "$prof" ] && out+="\033[35m${prof}\033[0m${sep}"
 out+="\033[1m${model:-?}\033[0m"
 out+="${sep}ctx $(pct "$ctx")"
 [ -n "$ctxtok" ] && out+=" \033[37m$ctxtok\033[0m"
